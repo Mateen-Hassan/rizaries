@@ -1,0 +1,7 @@
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/analyze-room"
+  to = "/.netlify/functions/analyze-room"
+  status = 200

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rizaries — Find Your Match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F5EFE4;
+    --cream-deep: #EDE3D0;
+    --ink: #2A211B;
+    --ink-soft: #6B5F52;
+    --gold: #B78A4D;
+    --gold-deep: #8C6A38;
+    --rust: #7A4632;
+    --line: rgba(42,33,27,0.12);
+    --paper: #FFFDF9;
+    --success: #2d7d46;
+    --info: #2d5f7d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:56px 24px 80px;
+  }
+
+  .mark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:40px;
+  }
+  .mark-glyph{
+    width:34px;height:34px;
+    border-radius:50%;
+    background:conic-gradient(from 200deg, var(--gold), var(--rust), var(--gold-deep), var(--gold));
+    display:flex;align-items:center;justify-content:center;
+    color:var(--paper);
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:15px;
+  }
+  .mark-name{
+    font-family:'Fraunces',serif;
+    letter-spacing:0.14em;
+    font-size:13px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(30px,5vw,44px);
+    line-height:1.08;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{ font-style:italic; color:var(--rust); }
+  .sub{
+    font-size:15.5px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    max-width:50ch;
+    margin:0 0 36px;
+  }
+
+  .dropzone{
+    border:1.5px dashed rgba(140,106,56,0.45);
+    border-radius:16px;
+    background:var(--paper);
+    padding:44px 28px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease, transform .2s ease;
+    display:block;
+  }
+  .dropzone:hover{ border-color:var(--gold-deep); }
+  .dropzone.drag{ border-color:var(--rust); background:#FBF6EC; transform:scale(1.005); }
+  .dropzone input{ display:none; }
+  .upload-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .upload-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--cream);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer;transition:transform .15s ease,background .15s ease;}
+  .upload-btn:hover{transform:translateY(-1px);background:var(--cream-deep);}
+  .upload-btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .upload-btn.primary:hover{background:var(--rust);border-color:var(--rust);}
+  .dz-hint{font-size:11px;color:var(--ink-soft);margin-top:11px;}
+  .dz-icon{
+    width:46px;height:46px;
+    margin:0 auto 16px;
+    border-radius:50%;
+    background:var(--cream-deep);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .dz-title{ font-family:'Fraunces',serif; font-size:18px; margin-bottom:4px; }
+  .dz-sub{ font-size:13px; color:var(--ink-soft); }
+
+  .sample-row{
+    display:flex; align-items:center; justify-content:center;
+    gap:10px; margin-top:18px; flex-wrap:wrap;
+  }
+  .sample-label{ font-size:12px; color:var(--ink-soft); }
+  .sample-chip{
+    width:30px;height:30px; border-radius:8px;
+    border:1px solid var(--line); cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .sample-chip:hover{ transform:translateY(-2px); }
+
+  .processing{ display:none; margin-top:40px; text-align:center; }
+  .processing.show{ display:block; animation:fadeUp .35s ease both; }
+  .scan-frame{
+    position:relative; width:112px; height:112px; margin:0 auto 18px;
+    border-radius:14px; overflow:hidden; border:1px solid var(--line);
+    background:var(--cream-deep);
+  }
+  .scan-frame img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .scan-frame::after{
+    content:''; position:absolute; left:0; right:0; height:2px; top:0;
+    background:linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold) 75%, transparent);
+    box-shadow:0 0 10px 2px rgba(183,138,77,0.65);
+    animation:scanMove 1.5s ease-in-out infinite;
+  }
+  @keyframes scanMove{
+    0%{ top:2%; opacity:.35; }
+    50%{ opacity:1; }
+    100%{ top:96%; opacity:.35; }
+  }
+  .processing-dots{ display:flex; justify-content:center; gap:8px; margin-bottom:16px; height:16px; }
+  .processing-dots span{
+    width:14px; height:14px; border-radius:50%;
+    border:1px solid var(--line);
+    opacity:0; transform:scale(.4);
+    animation:dotPop .35s ease forwards;
+  }
+  @keyframes dotPop{ to{ opacity:1; transform:scale(1); } }
+  .processing-status{
+    font-size:13.5px; color:var(--ink-soft); margin-bottom:14px; min-height:18px;
+    transition:opacity .2s ease;
+  }
+  .processing-bar{
+    width:200px; height:3px; margin:0 auto; border-radius:2px;
+    background:var(--line); overflow:hidden;
+  }
+  .processing-bar-fill{
+    height:100%; width:0%; background:var(--gold-deep);
+    transition:width .5s ease;
+  }
+
+  #results{ display:none; margin-top:44px; }
+  #results.show{ display:block; animation:fadeUp .5s ease both; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .preview-row{ display:flex; gap:18px; align-items:center; margin-bottom:32px; }
+  .preview-thumb{
+    width:88px;height:88px; border-radius:12px; object-fit:cover;
+    border:1px solid var(--line); flex-shrink:0; background:var(--cream-deep);
+  }
+  .preview-info{ flex:1; }
+  .preview-label{
+    font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:8px;
+  }
+  .swatch-strip{ display:flex; height:26px; border-radius:7px; overflow:hidden; border:1px solid var(--line); }
+  .swatch-strip span{ flex:1; }
+
+  .divider{ height:1px; background:var(--line); margin:32px 0; }
+
+  .match-eyebrow{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gold-deep); font-weight:600; margin-bottom:8px;
+  }
+  .match-card{ background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:26px; }
+  .match-title{ font-family:'Fraunces',serif; font-size:26px; margin:0 0 14px; }
+
+  .compare{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; margin-bottom:16px; }
+  .compare-col{ text-align:center; }
+  .compare-label{
+    font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:7px;
+  }
+  .compare-strip{ display:flex; height:34px; border-radius:8px; overflow:hidden; border:1px solid var(--line); }
+  .compare-strip span{ flex:1; }
+  .compare-arrow{ color:var(--gold-deep); font-size:18px; }
+
+  .match-score{ font-size:13px; color:var(--ink-soft); margin-bottom:20px; }
+  .match-score b{ color:var(--rust); }
+
+  .shop-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--ink); color:var(--paper); text-decoration:none;
+    font-size:14px; font-weight:500; padding:12px 20px; border-radius:9px;
+    transition:background .2s ease;
+  }
+  .shop-btn:hover{ background:var(--rust); }
+
+  /* Color Suggestions Styles - Simplified */
+  .suggestions-section{
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .suggestions-title{
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    margin:0 0 6px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .suggestions-title small{
+    font-size:13px;
+    font-weight:400;
+    color:var(--ink-soft);
+    font-family:'Inter',sans-serif;
+  }
+  .suggestions-sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:16px;
+  }
+  .suggestion-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:14px;
+    margin-bottom:12px;
+  }
+  .suggestion-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .suggestion-card:hover{ 
+    transform:translateY(-3px); 
+    box-shadow:0 4px 12px rgba(42,33,27,0.08);
+  }
+  .suggestion-card .label{
+    font-size:12px;
+    font-weight:600;
+    margin-bottom:8px;
+    color:var(--ink);
+    text-align:center;
+  }
+  .suggestion-card .colors{
+    display:flex;
+    gap:5px;
+    margin:0 auto;
+  }
+  .suggestion-card .colors span{
+    flex:1;
+    height:32px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    min-width:24px;
+    position:relative;
+    transition:transform .15s ease;
+  }
+  .suggestion-card .colors span:hover{
+    transform:scale(1.05);
+    z-index:1;
+  }
+  .suggestion-card .color-hex{
+    font-size:8px;
+    color:var(--ink-soft);
+    font-family:monospace;
+    text-align:center;
+    margin-top:4px;
+    opacity:0.6;
+  }
+  .suggestion-note{
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:12px 16px;
+    background:var(--cream-deep);
+    border-radius:8px;
+    margin-top:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .suggestion-note .icon{ font-size:16px; }
+
+  .product-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .product-grid.small{ grid-template-columns:repeat(2, 1fr); gap:10px; }
+  .product-card{
+    display:block; text-decoration:none; color:var(--ink);
+    border:1px solid var(--line); border-radius:11px;
+    overflow:hidden; background:var(--paper);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .product-card:hover{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(42,33,27,0.08); }
+  .product-img{
+    width:100%; aspect-ratio:1/1;
+    background-size:cover; background-position:center;
+    background-color:var(--cream-deep);
+  }
+  .product-body{ padding:9px 10px 11px; }
+  .product-title{
+    font-size:12px; line-height:1.35; font-weight:500;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    margin-bottom:4px; min-height:32px;
+  }
+  .product-price{ font-size:12px; color:var(--gold-deep); font-weight:600; }
+  .product-skeleton{
+    border:1px solid var(--line); border-radius:11px; overflow:hidden; background:var(--paper);
+  }
+  .product-skeleton .product-img{
+    background:linear-gradient(90deg, var(--cream-deep) 25%, #f6efdf 37%, var(--cream-deep) 63%);
+    background-size:400% 100%;
+    animation:shimmer 1.4s ease infinite;
+  }
+  @keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+  .products-note{
+    font-size:11.5px; color:var(--ink-soft); margin:-10px 0 18px;
+  }
+
+  .also-block{
+    border:1px solid var(--line); border-radius:14px; padding:18px 18px 20px;
+    background:var(--paper); margin-bottom:12px;
+  }
+  .also-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .also-name{ display:flex; align-items:center; gap:9px; font-family:'Fraunces',serif; font-size:16px; }
+  .also-dot{ width:16px;height:16px; border-radius:5px; flex-shrink:0; }
+  .also-link{ font-size:12px; color:var(--gold-deep); text-decoration:none; font-weight:500; }
+  .also-link:hover{ text-decoration:underline; }
+  .also-eyebrow{
+    font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--ink-soft); margin:28px 0 12px;
+  }
+
+  .reset-link{
+    display:block; text-align:center; margin-top:30px; font-size:13px;
+    color:var(--ink-soft); text-decoration:underline; cursor:pointer;
+    background:none; border:none; font-family:inherit;
+  }
+
+  .note{
+    margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
+    font-size:12.5px; line-height:1.6; color:var(--ink-soft);
+  }
+
+
+  /* AI Room Analysis */
+  .ai-insights{margin-top:18px;padding:18px;background:var(--cream-deep);border:1px solid var(--line);border-radius:12px;}
+  .ai-insights-title{font-family:'Fraunces',serif;font-size:17px;margin-bottom:8px;}
+  .ai-insights-copy{font-size:12.5px;line-height:1.55;color:var(--ink-soft);margin-bottom:12px;}
+  .ai-tags{display:flex;flex-wrap:wrap;gap:7px;}
+  .ai-tag{font-size:11px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--paper);}
+  .ai-tag strong{color:var(--ink);}
+  .ai-error{font-size:11.5px;color:var(--ink-soft);margin-top:9px;}
+
+  @media (max-width:640px){
+    .suggestion-grid{ grid-template-columns:1fr 1fr; }
+    .product-grid{ grid-template-columns:1fr 1fr; }
+    .compare{ grid-template-columns:1fr; gap:8px; }
+    .compare-arrow{ transform:rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mark">
+    <div class="mark-glyph">R</div>
+    <div class="mark-name">Rizaries</div>
+  </div>
+
+  <div class="eyebrow">Upload your space</div>
+  <h1>See what <em>suits</em><br>your room.</h1>
+  <p class="sub">Upload a photo of your room and we'll match its palette to the Rizaries collection that fits it best — then pull a few best-selling pieces from that collection for you.</p>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dz-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8C6A38" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 16V4M12 4l-5 5M12 4l5 5"/>
+        <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+      </svg>
+    </div>
+    <div class="dz-title">Add a photo of your room</div>
+    <div class="dz-sub">Take a new photo or choose one from your device</div>
+    <div class="upload-actions">
+      <label class="upload-btn primary" for="cameraInput">📷 Take a photo</label>
+      <label class="upload-btn" for="fileInput">🖼️ Choose photo</label>
+    </div>
+    <input type="file" id="cameraInput" accept="image/jpeg,image/png,image/webp" capture="environment">
+    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+    <div class="dz-hint">JPEG, PNG or WEBP · image is resized before AI analysis</div>
+  </div>
+
+  <div class="sample-row">
+    <span class="sample-label">No photo handy? Try a sample palette:</span>
+    <div class="sample-chip" style="background:linear-gradient(135deg,#8a8d8f,#c8b89a)" data-sample="0" title="Warm neutrals"></div>
+    <div class="sample-chip" style="background:linear-gradient(135deg,#1b3a5c,#c9a227)" data-sample="1" title="Navy & gold"></div>
+    <div class="sample-chip" style="background:linear-gradient(135deg,#e9e3d6,#9fae8b)" data-sample="2" title="Sage & cream"></div>
+  </div>
+
+  <div class="processing" id="processingPanel">
+    <div class="scan-frame">
+      <img id="processingImg" src="" alt="">
+    </div>
+    <div class="processing-dots" id="processingDots"></div>
+    <div class="processing-status" id="processingStatus">Reading colors from your photo…</div>
+    <div class="processing-bar"><div class="processing-bar-fill" id="processingFill"></div></div>
+  </div>
+
+  <div id="results">
+    <div class="preview-row">
+      <img id="previewThumb" class="preview-thumb" src="" alt="Your room">
+      <div class="preview-info">
+        <div class="preview-label">Colors we found in your room</div>
+        <div class="swatch-strip" id="paletteStrip"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="match-eyebrow">Best match</div>
+    <div class="match-card">
+      <h2 class="match-title" id="matchTitle">—</h2>
+
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-label">Your room</div>
+          <div class="compare-strip" id="compareRoom"></div>
+        </div>
+        <div class="compare-arrow">⇄</div>
+        <div class="compare-col">
+          <div class="compare-label">This collection</div>
+          <div class="compare-strip" id="compareTheme"></div>
+        </div>
+      </div>
+
+      <div class="match-score" id="matchBlurb"></div>
+
+      <div class="ai-insights" id="aiInsights" style="display:none">
+        <div class="ai-insights-title">AI room insights</div>
+        <div class="ai-insights-copy" id="aiInsightsCopy"></div>
+        <div class="ai-tags" id="aiTags"></div>
+        <div class="ai-error" id="aiError"></div>
+      </div>
+
+      <!-- Color Suggestions Section - Simplified -->
+      <div class="suggestions-section" id="suggestionsSection">
+        <div class="suggestions-title">
+          🎨 Color Pairing Suggestions
+          <small>— based on color theory</small>
+        </div>
+        <div class="suggestions-sub">Beautiful color harmonies that complement your room's dominant color</div>
+        <div class="suggestion-grid" id="suggestionGrid"></div>
+        <div class="suggestion-note">
+          <span class="icon">💡</span>
+          <span><strong>Pro tip:</strong> Use these color schemes as inspiration for accent walls, furniture, decor, and accessories to create a cohesive, professionally-designed space.</span>
+        </div>
+      </div>
+
+      <div class="product-grid" id="bestProducts"></div>
+      <a class="shop-btn" id="shopLink" href="#" target="_blank" rel="noopener">
+        Shop this collection
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+    <div class="also-eyebrow">Also worth a look</div>
+    <div id="alsoBlocks"></div>
+
+    <button class="reset-link" id="resetBtn">Try another photo</button>
+  </div>
+
+  <div class="note">
+    Prototype — color extraction runs locally in the browser. For better room understanding, the resized photo is sent to the protected Netlify Function and analyzed by Groq vision. The AI result only improves collection ranking; the local color engine remains the fallback if AI is unavailable. Products are pulled live from Rizaries collections.
+  </div>
+
+</div>
+
+<script>
+  // ---- Rizaries color-theme reference palette + collection handles ----
+  const THEMES = [
+    { name: "Black & Gold/Copper", handle: "black-gold", colors: ["#1a1a1a", "#c9a227"] },
+    { name: "Black & White/Silver", handle: "black-white", colors: ["#111111", "#f2f2f2", "#bfbfbf"] },
+    { name: "Blue & Navy", handle: "blue-navy", colors: ["#1b3a5c", "#2f5d8a"] },
+    { name: "Beige/Copper Gold", handle: "copper", colors: ["#c8a97e", "#b08d57"] },
+    { name: "Brown", handle: "brown-and-gold", colors: ["#6b4226", "#8a5a3c"] },
+    { name: "Green & Emerald", handle: "green-cushions", colors: ["#0b6e4f", "#2f8f5b"] },
+    { name: "Yellow & Mustard", handle: "yellow", colors: ["#d4a017", "#e8b923"] },
+    { name: "Pink", handle: "pink", colors: ["#e8a0bf", "#d97ea3"] },
+    { name: "Purple", handle: "purple", colors: ["#7b4b94", "#5d3670"] },
+    { name: "Grey", handle: "grey", colors: ["#8a8d8f", "#6e7173"] },
+    { name: "Teal & Sea Green", handle: "teal-sea-green", colors: ["#1f7a72", "#2f9a8f"] },
+    { name: "Maroon & Burgundy", handle: "red-burgundy", colors: ["#6b1e2b", "#8c2b3a"] },
+    { name: "White Gold", handle: "white-gold", colors: ["#ede6d8", "#d9c9a3"] },
+    { name: "Tropical & Animal Prints", handle: "tropical", colors: ["#4c7a3a", "#c99a4b"] },
+  ];
+  const STORE = "https://rizaries.com";
+  const PRODUCTS_PER_BEST = 3;
+  const PRODUCTS_PER_ALSO = 2;
+
+  const SAMPLES = [
+    [{rgb:[138,141,143],weight:0.42},{rgb:[200,184,154],weight:0.31},{rgb:[236,231,220],weight:0.27}],
+    [{rgb:[27,58,92],weight:0.5},{rgb:[201,162,39],weight:0.28},{rgb:[20,20,20],weight:0.22}],
+    [{rgb:[233,227,214],weight:0.45},{rgb:[159,174,139],weight:0.35},{rgb:[110,130,100],weight:0.2}],
+  ];
+
+  // ============================================================
+  // ROBUST COLOR THEORY ENGINE — FLAWLESS IMPLEMENTATION
+  // ============================================================
+
+  // ---- Color Space Conversions ----
+  
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return { h: h * 360, s: s * 100, l: l * 100 };
+  }
+
+  function hslToRgb(h, s, l) {
+    h = ((h % 360) + 360) % 360;
+    s = Math.max(0, Math.min(100, s));
+    l = Math.max(0, Math.min(100, l));
+    
+    const hNorm = h / 360;
+    const sNorm = s / 100;
+    const lNorm = l / 100;
+    
+    if (sNorm === 0) {
+      const gray = Math.round(lNorm * 255);
+      return [gray, gray, gray];
+    }
+    
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    
+    const q = lNorm < 0.5 ? lNorm * (1 + sNorm) : lNorm + sNorm - lNorm * sNorm;
+    const p = 2 * lNorm - q;
+    const r = hue2rgb(p, q, hNorm + 1/3);
+    const g = hue2rgb(p, q, hNorm);
+    const b = hue2rgb(p, q, hNorm - 1/3);
+    
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+
+  function rgbToHex([r, g, b]) {
+    const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+    return '#' + [clamp(r), clamp(g), clamp(b)]
+      .map(x => x.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16)
+    ] : [0, 0, 0];
+  }
+
+  // ---- Perceptual Color Distance (CIE76) ----
+  function rgbToLab(r, g, b) {
+    let rLinear = r / 255;
+    let gLinear = g / 255;
+    let bLinear = b / 255;
+    
+    rLinear = rLinear > 0.04045 ? Math.pow((rLinear + 0.055) / 1.055, 2.4) : rLinear / 12.92;
+    gLinear = gLinear > 0.04045 ? Math.pow((gLinear + 0.055) / 1.055, 2.4) : gLinear / 12.92;
+    bLinear = bLinear > 0.04045 ? Math.pow((bLinear + 0.055) / 1.055, 2.4) : bLinear / 12.92;
+    
+    const x = rLinear * 0.4124564 + gLinear * 0.3575761 + bLinear * 0.1804375;
+    const y = rLinear * 0.2126729 + gLinear * 0.7151522 + bLinear * 0.0721750;
+    const z = rLinear * 0.0193339 + gLinear * 0.1191920 + bLinear * 0.9503041;
+    
+    const refX = 95.047;
+    const refY = 100.000;
+    const refZ = 108.883;
+    
+    const xNorm = x / refX;
+    const yNorm = y / refY;
+    const zNorm = z / refZ;
+    
+    const f = (t) => t > 0.008856 ? Math.pow(t, 1/3) : (7.787 * t) + 16/116;
+    
+    const l = 116 * f(yNorm) - 16;
+    const a = 500 * (f(xNorm) - f(yNorm));
+    const bVal = 200 * (f(yNorm) - f(zNorm));
+    
+    return { L: l, a: a, b: bVal };
+  }
+
+  function colorDistanceLab(c1, c2) {
+    const lab1 = rgbToLab(c1[0], c1[1], c1[2]);
+    const lab2 = rgbToLab(c2[0], c2[1], c2[2]);
+    const dL = lab1.L - lab2.L;
+    const da = lab1.a - lab2.a;
+    const db = lab1.b - lab2.b;
+    return Math.sqrt(dL * dL + da * da + db * db);
+  }
+
+  // ---- Color Harmony Generators ----
+  
+  function generateComplementary(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const compH = (hsl.h + 180) % 360;
+    return [
+      hslToRgb(compH, hsl.s, hsl.l),
+      hslToRgb(compH, Math.min(hsl.s + 15, 90), Math.min(hsl.l + 15, 85)),
+      hslToRgb(compH, Math.max(hsl.s - 15, 5), Math.max(hsl.l - 15, 10)),
+      hslToRgb(compH, Math.min(hsl.s + 30, 95), Math.min(hsl.l + 30, 90)),
+      hslToRgb(compH, Math.max(hsl.s - 30, 5), Math.max(hsl.l - 30, 10)),
+    ];
+  }
+
+  function generateAnalogous(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const angles = [-60, -30, 0, 30, 60];
+    return angles.map(angle => {
+      const h = (hsl.h + angle + 360) % 360;
+      const s = hsl.s + (angle / 60) * 5;
+      const l = hsl.l + (angle / 60) * 3;
+      return hslToRgb(h, Math.max(5, Math.min(95, s)), Math.max(10, Math.min(85, l)));
+    });
+  }
+
+  function generateTriadic(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const angles = [0, 120, 240];
+    return angles.map((angle, i) => {
+      const h = (hsl.h + angle) % 360;
+      const s = hsl.s + (i === 1 ? 10 : i === 2 ? -10 : 0);
+      const l = hsl.l + (i === 1 ? 5 : i === 2 ? -5 : 0);
+      return hslToRgb(h, Math.max(5, Math.min(95, s)), Math.max(10, Math.min(90, l)));
+    });
+  }
+
+  function generateMonochromatic(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const variations = [
+      { s: 0.7, l: 0.2 },
+      { s: 0.8, l: 0.4 },
+      { s: 1.0, l: 0.5 },
+      { s: 0.8, l: 0.7 },
+      { s: 0.6, l: 0.85 },
+    ];
+    return variations.map(v => 
+      hslToRgb(hsl.h, Math.max(5, Math.min(95, hsl.s * v.s)), Math.max(5, Math.min(95, hsl.l * v.l)))
+    );
+  }
+
+  function generateSplitComplementary(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const baseH = hsl.h;
+    const angles = [0, 150, 210];
+    return angles.map((angle, i) => {
+      const h = (baseH + angle) % 360;
+      const s = hsl.s + (i === 1 ? 10 : i === 2 ? -10 : 0);
+      const l = hsl.l + (i === 1 ? 5 : i === 2 ? -5 : 0);
+      return hslToRgb(h, Math.max(5, Math.min(95, s)), Math.max(10, Math.min(90, l)));
+    });
+  }
+
+  function generateTetradic(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const angles = [0, 90, 180, 270];
+    return angles.map((angle, i) => {
+      const h = (hsl.h + angle) % 360;
+      const s = hsl.s + (i % 2 === 0 ? 10 : -10);
+      const l = hsl.l + (i % 2 === 0 ? 5 : -5);
+      return hslToRgb(h, Math.max(5, Math.min(95, s)), Math.max(10, Math.min(90, l)));
+    });
+  }
+
+  function generateSquare(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const angles = [0, 90, 180, 270];
+    return angles.map((angle, i) => {
+      const h = (hsl.h + angle) % 360;
+      const s = 70 - (i * 5);
+      const l = 50 + (i * 5);
+      return hslToRgb(h, Math.max(5, Math.min(95, s)), Math.max(10, Math.min(90, l)));
+    });
+  }
+
+  // ---- Color Analysis ----
+  
+  function analyzeColor(rgb) {
+    const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const max = Math.max(rgb[0], rgb[1], rgb[2]);
+    const min = Math.min(rgb[0], rgb[1], rgb[2]);
+    
+    return {
+      hue: hsl.h,
+      saturation: hsl.s,
+      lightness: hsl.l,
+      isWarm: hsl.h > 15 && hsl.h < 45,
+      isCool: hsl.h > 180 && hsl.h < 280,
+      isNeutral: hsl.s < 15,
+      isDark: hsl.l < 30,
+      isLight: hsl.l > 70,
+      isVibrant: hsl.s > 60 && hsl.l > 40 && hsl.l < 80,
+      contrast: max - min,
+    };
+  }
+
+  function suggestHarmonyForColor(rgb) {
+    const analysis = analyzeColor(rgb);
+    const harmonies = [];
+    
+    // Core harmonies (always included)
+    harmonies.push({
+      type: "Complementary",
+      colors: generateComplementary(rgb)
+    });
+    
+    harmonies.push({
+      type: "Analogous",
+      colors: generateAnalogous(rgb)
+    });
+    
+    harmonies.push({
+      type: "Triadic",
+      colors: generateTriadic(rgb)
+    });
+    
+    harmonies.push({
+      type: "Monochromatic",
+      colors: generateMonochromatic(rgb)
+    });
+    
+    harmonies.push({
+      type: "Split Complementary",
+      colors: generateSplitComplementary(rgb)
+    });
+    
+    // Extra harmonies for specific color types
+    if (analysis.isVibrant) {
+      harmonies.push({
+        type: "Square",
+        colors: generateSquare(rgb)
+      });
+    }
+    
+    if (analysis.isWarm || analysis.isCool) {
+      harmonies.push({
+        type: "Tetradic",
+        colors: generateTetradic(rgb)
+      });
+    }
+    
+    return harmonies;
+  }
+
+  // ---- Utility Functions ----
+  
+  function colorDistance(c1, c2) {
+    const rmean = (c1[0] + c2[0]) / 2;
+    const dr = c1[0] - c2[0];
+    const dg = c1[1] - c2[1];
+    const db = c1[2] - c2[2];
+    return Math.sqrt((2 + rmean/256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean)/256) * db * db);
+  }
+
+  // ---- Real k-means clustering ----
+  function kMeansPalette(pixels, k = 5, iterations = 6) {
+    if (pixels.length === 0) return [];
+    k = Math.min(k, pixels.length);
+    
+    const stride = Math.max(1, Math.floor(pixels.length / k));
+    let centroids = [];
+    for (let i = 0; i < k; i++) {
+      const idx = Math.min(i * stride, pixels.length - 1);
+      centroids.push(pixels[idx].slice());
+    }
+
+    let assignments = new Array(pixels.length).fill(0);
+    
+    for (let iter = 0; iter < iterations; iter++) {
+      for (let i = 0; i < pixels.length; i++) {
+        let best = 0;
+        let bestDist = Infinity;
+        for (let c = 0; c < k; c++) {
+          const d = colorDistance(pixels[i], centroids[c]);
+          if (d < bestDist) {
+            bestDist = d;
+            best = c;
+          }
+        }
+        assignments[i] = best;
+      }
+      
+      const sums = Array.from({ length: k }, () => [0, 0, 0, 0]);
+      for (let i = 0; i < pixels.length; i++) {
+        const c = assignments[i];
+        sums[c][0] += pixels[i][0];
+        sums[c][1] += pixels[i][1];
+        sums[c][2] += pixels[i][2];
+        sums[c][3]++;
+      }
+      
+      for (let c = 0; c < k; c++) {
+        if (sums[c][3] > 0) {
+          centroids[c] = [
+            sums[c][0] / sums[c][3],
+            sums[c][1] / sums[c][3],
+            sums[c][2] / sums[c][3]
+          ];
+        }
+      }
+    }
+    
+    const counts = new Array(k).fill(0);
+    assignments.forEach(a => counts[a]++);
+    const total = pixels.length;
+    
+    return centroids
+      .map((c, i) => ({ 
+        rgb: c.map(Math.round), 
+        weight: counts[i] / total 
+      }))
+      .filter(c => c.weight > 0.01)
+      .sort((a, b) => b.weight - a.weight);
+  }
+
+  function extractPalette(img, k = 5) {
+    const size = 80;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, size, size);
+    const data = ctx.getImageData(0, 0, size, size).data;
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 128) continue;
+      pixels.push([data[i], data[i + 1], data[i + 2]]);
+    }
+    return kMeansPalette(pixels, k, 6);
+  }
+
+  // ---- Theme Matching ----
+  function matchThemes(palette) {
+    const scores = THEMES.map(theme => {
+      let score = 0;
+      palette.forEach(p => {
+        const dists = theme.colors.map(hex => colorDistanceLab(p.rgb, hexToRgb(hex)));
+        const minDist = Math.min(...dists);
+        score += p.weight * (1 / (1 + minDist / 25));
+      });
+      return { theme, score };
+    });
+    scores.sort((a, b) => b.score - a.score);
+    return scores;
+  }
+
+  // ---- Rendering Functions ----
+  
+  function renderStrip(el, palette) {
+    el.innerHTML = '';
+    if (!palette || palette.length === 0) {
+      const span = document.createElement('span');
+      span.style.background = '#e0d8d0';
+      span.textContent = '—';
+      span.style.display = 'flex';
+      span.style.alignItems = 'center';
+      span.style.justifyContent = 'center';
+      span.style.fontSize = '10px';
+      span.style.color = '#999';
+      el.appendChild(span);
+      return;
+    }
+    palette.forEach(p => {
+      const span = document.createElement('span');
+      span.style.background = rgbToHex(p.rgb);
+      span.style.flexGrow = Math.max(p.weight, 0.08);
+      el.appendChild(span);
+    });
+  }
+
+  // Simplified renderSuggestions - only shows harmony type and color swatches
+  function renderSuggestions(rgb) {
+    const container = document.getElementById('suggestionGrid');
+    const harmonies = suggestHarmonyForColor(rgb);
+    
+    container.innerHTML = '';
+    harmonies.forEach(harmony => {
+      const card = document.createElement('div');
+      card.className = 'suggestion-card';
+      
+      const colorsHtml = harmony.colors.map(c => {
+        const hex = rgbToHex(c);
+        return `<span style="background:${hex}" title="${hex}"></span>`;
+      }).join('');
+      
+      card.innerHTML = `
+        <div class="label">${harmony.type}</div>
+        <div class="colors">${colorsHtml}</div>
+      `;
+      
+      container.appendChild(card);
+    });
+  }
+
+  // ---- Live Product Fetch ----
+  async function fetchCollectionProducts(handle, limit) {
+    try {
+      const res = await fetch(`${STORE}/collections/${handle}/products.json?limit=${limit}&sort_by=best-selling`);
+      if (!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      return (data.products || []).slice(0, limit).map(p => ({
+        title: p.title,
+        price: p.variants && p.variants[0] ? p.variants[0].price : null,
+        image: p.images && p.images[0] ? p.images[0].src : null,
+        url: `${STORE}/products/${p.handle}`
+      }));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function skeletonGrid(container, count, small) {
+    container.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement('div');
+      d.className = 'product-skeleton';
+      d.innerHTML = `<div class="product-img"></div>`;
+      container.appendChild(d);
+    }
+  }
+
+  function renderProducts(container, products) {
+    container.innerHTML = '';
+    if (!products || products.length === 0) {
+      const p = document.createElement('div');
+      p.className = 'products-note';
+      p.textContent = "Couldn't load live products from here — this loads instantly once the widget is on rizaries.com itself. Use the link below to browse the collection.";
+      container.parentElement.insertBefore(p, container.nextSibling);
+      return;
+    }
+    products.forEach(prod => {
+      const a = document.createElement('a');
+      a.className = 'product-card';
+      a.href = prod.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.innerHTML = `
+        <div class="product-img" style="${prod.image ? `background-image:url('${prod.image}')` : ''}"></div>
+        <div class="product-body">
+          <div class="product-title">${prod.title}</div>
+          ${prod.price ? `<div class="product-price">Rs. ${Number(prod.price).toLocaleString()}</div>` : ''}
+        </div>`;
+      container.appendChild(a);
+    });
+  }
+
+  // ---- AI room analysis (Groq via Netlify Function) ----
+  const AI_ANALYSIS_ENDPOINT = '/api/analyze-room';
+
+  function fileDataUrlToParts(dataUrl) {
+    const match = /^data:(image\/[^;]+);base64,(.+)$/s.exec(dataUrl || '');
+    if (!match) throw new Error('Invalid image data');
+    return { mimeType: match[1], data: match[2] };
+  }
+
+  async function analyzeRoomWithAI(dataUrl) {
+    const { mimeType, data } = fileDataUrlToParts(dataUrl);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 16000);
+    try {
+      const res = await fetch(AI_ANALYSIS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: data, mimeType }),
+        signal: controller.signal
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'AI analysis failed');
+      return body;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function renderAIInsights(ai) {
+    const box = document.getElementById('aiInsights');
+    const copy = document.getElementById('aiInsightsCopy');
+    const tags = document.getElementById('aiTags');
+    const err = document.getElementById('aiError');
+    if (!ai) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    err.textContent = '';
+    const room = ai.room_type ? ai.room_type.replace(/\b\w/g, c => c.toUpperCase()) : 'Room';
+    const style = ai.style ? ai.style.replace(/\b\w/g, c => c.toUpperCase()) : 'interior';
+    const mood = ai.mood ? ` The overall feel is ${ai.mood}.` : '';
+    copy.textContent = `${room} with a ${style} look.${mood} AI considered the room layout, furniture and decor in addition to its colors.`;
+    tags.innerHTML = '';
+    const values = [
+      ['Room', ai.room_type],
+      ['Style', ai.style],
+      ['Main color', ai.dominant_color],
+      ['Secondary', ai.secondary_color],
+      ['Floor', ai.floor_color],
+      ['Furniture', Array.isArray(ai.furniture) ? ai.furniture.slice(0,3).join(', ') : '']
+    ].filter(x => x[1]);
+    values.forEach(([label,value]) => {
+      const el = document.createElement('span');
+      el.className = 'ai-tag';
+      el.innerHTML = `<strong>${label}:</strong> ${String(value)}`;
+      tags.appendChild(el);
+    });
+  }
+
+  function rerankWithAI(ranked, ai) {
+    if (!ai || !Array.isArray(ai.recommended_collection_handles)) return ranked;
+    const boosts = new Map(ai.recommended_collection_handles.map((h, i) => [String(h).toLowerCase(), 0.16 - i * 0.035]));
+    return ranked.map(r => ({
+      ...r,
+      score: r.score + (boosts.get(r.theme.handle.toLowerCase()) || 0)
+    })).sort((a,b) => b.score - a.score);
+  }
+
+  // Resize once on the client: smaller upload, faster Groq request, lower bandwidth.
+  // The same optimized image is used for local palette extraction and AI.
+  function prepareImage(file, maxSide = 1280, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) return reject(new Error('Please select an image.'));
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read the image.'));
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+          const w = Math.max(1, Math.round(img.naturalWidth * scale));
+          const h = Math.max(1, Math.round(img.naturalHeight * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d', { alpha: false });
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('This image format is not supported by your browser.'));
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ---- Main Results Renderer ----
+  async function renderResults(palette, thumbSrc, ai = null) {
+    const results = document.getElementById('results');
+    const previewThumb = document.getElementById('previewThumb');
+    previewThumb.src = thumbSrc || '';
+    previewThumb.style.display = thumbSrc ? 'block' : 'none';
+
+    renderStrip(document.getElementById('paletteStrip'), palette);
+    renderStrip(document.getElementById('compareRoom'), palette);
+
+    const ranked = rerankWithAI(matchThemes(palette), ai);
+    const best = ranked[0];
+    const runners = ranked.slice(1, 4);
+    renderAIInsights(ai);
+
+    document.getElementById('matchTitle').textContent = best.theme.name;
+    renderStrip(document.getElementById('compareTheme'), best.theme.colors.map(h => ({ rgb: hexToRgb(h), weight: 1 })));
+
+    const confidence = Math.min(99, Math.round(best.score * 55));
+    document.getElementById('matchBlurb').innerHTML =
+      `<b>${confidence}% palette match</b> — this is the closest of Rizaries' color-theme collections to your room.`;
+
+    document.getElementById('shopLink').href = `${STORE}/collections/${best.theme.handle}`;
+
+    // Render color suggestions
+    if (palette && palette.length > 0) {
+      const dominantColor = palette[0].rgb;
+      renderSuggestions(dominantColor);
+      document.getElementById('suggestionsSection').style.display = 'block';
+    } else {
+      document.getElementById('suggestionsSection').style.display = 'none';
+    }
+
+    // Best match products
+    const bestGrid = document.getElementById('bestProducts');
+    skeletonGrid(bestGrid, PRODUCTS_PER_BEST);
+
+    // Also-worth-a-look blocks
+    const alsoContainer = document.getElementById('alsoBlocks');
+    alsoContainer.innerHTML = '';
+    const alsoGrids = [];
+    runners.forEach(r => {
+      const block = document.createElement('div');
+      block.className = 'also-block';
+      block.innerHTML = `
+        <div class="also-head">
+          <div class="also-name">
+            <span class="also-dot" style="background:linear-gradient(135deg, ${r.theme.colors[0]}, ${r.theme.colors[1] || r.theme.colors[0]})"></span>
+            ${r.theme.name}
+          </div>
+          <a class="also-link" href="${STORE}/collections/${r.theme.handle}" target="_blank" rel="noopener">Shop collection →</a>
+        </div>
+        <div class="product-grid small"></div>
+      `;
+      alsoContainer.appendChild(block);
+      alsoGrids.push({ grid: block.querySelector('.product-grid'), theme: r.theme });
+    });
+    alsoGrids.forEach(g => skeletonGrid(g.grid, PRODUCTS_PER_ALSO, true));
+
+    results.classList.add('show');
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Fetch live products
+    const bestProducts = await fetchCollectionProducts(best.theme.handle, PRODUCTS_PER_BEST);
+    renderProducts(bestGrid, bestProducts);
+
+    alsoGrids.forEach(async g => {
+      const prods = await fetchCollectionProducts(g.theme.handle, PRODUCTS_PER_ALSO);
+      renderProducts(g.grid, prods);
+    });
+  }
+
+  // ---- Processing Animation ----
+  const STAGES = [
+    { text: "Reading colors from your photo…", pct: 30, duration: 650 },
+    { text: "Comparing against 14 curated collections…", pct: 72, duration: 650 },
+    { text: "Finalizing your best match…", pct: 100, duration: 420 },
+  ];
+
+  function runProcessingAnimation(thumbSrc, paletteForDots) {
+    return new Promise(resolve => {
+      const panel = document.getElementById('processingPanel');
+      const img = document.getElementById('processingImg');
+      const statusEl = document.getElementById('processingStatus');
+      const fill = document.getElementById('processingFill');
+      const dotsEl = document.getElementById('processingDots');
+
+      img.style.display = thumbSrc ? 'block' : 'none';
+      img.src = thumbSrc || '';
+      fill.style.width = '0%';
+      dotsEl.innerHTML = '';
+      statusEl.style.opacity = '1';
+
+      document.getElementById('dropzone').style.display = 'none';
+      document.querySelector('.sample-row').style.display = 'none';
+      panel.classList.add('show');
+
+      let i = 0;
+      function nextStage() {
+        if (i >= STAGES.length) {
+          setTimeout(() => { panel.classList.remove('show'); resolve(); }, 200);
+          return;
+        }
+        const s = STAGES[i];
+        statusEl.style.opacity = '0';
+        setTimeout(() => {
+          statusEl.textContent = s.text;
+          statusEl.style.opacity = '1';
+        }, 120);
+        fill.style.width = s.pct + '%';
+        if (i === 1 && paletteForDots) {
+          dotsEl.innerHTML = '';
+          paletteForDots.slice(0, 5).forEach((p, idx) => {
+            const dot = document.createElement('span');
+            dot.style.background = rgbToHex(p.rgb);
+            dot.style.animationDelay = (idx * 90) + 'ms';
+            dotsEl.appendChild(dot);
+          });
+        }
+        i++;
+        setTimeout(nextStage, s.duration);
+      }
+      nextStage();
+    });
+  }
+
+  // ---- Event Handlers ----
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const cameraInput = document.getElementById('cameraInput');
+  let isProcessing = false;
+
+  async function handleFile(file) {
+    if (!file || !file.type.startsWith('image/') || isProcessing) return;
+    isProcessing = true;
+    try {
+      const optimizedDataUrl = await prepareImage(file);
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error('Could not prepare the image.'));
+        img.src = optimizedDataUrl;
+      });
+
+      const palette = extractPalette(img);
+
+      // Start AI and UI processing together instead of waiting for one after the other.
+      const aiPromise = analyzeRoomWithAI(optimizedDataUrl).catch(err => {
+        console.warn('Groq analysis unavailable:', err.message);
+        return null;
+      });
+      await runProcessingAnimation(optimizedDataUrl, palette);
+      const ai = await aiPromise;
+
+      document.getElementById('dropzone').style.display = 'block';
+      document.querySelector('.sample-row').style.display = 'flex';
+      renderResults(palette, optimizedDataUrl, ai);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Could not process the image. Please try another photo.');
+    } finally {
+      isProcessing = false;
+      fileInput.value = '';
+      cameraInput.value = '';
+    }
+  }
+
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  cameraInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      dropzone.classList.add('drag');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      dropzone.classList.remove('drag');
+    });
+  });
+
+  dropzone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  document.querySelectorAll('.sample-chip').forEach(chip => {
+    chip.addEventListener('click', async () => {
+      if (isProcessing) return;
+      isProcessing = true;
+      try {
+        const palette = SAMPLES[Number(chip.dataset.sample)];
+        await runProcessingAnimation(null, palette);
+        document.getElementById('dropzone').style.display = 'block';
+        document.querySelector('.sample-row').style.display = 'flex';
+        renderResults(palette, null);
+      } finally {
+        isProcessing = false;
+      }
+    });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('aiInsights').style.display = 'none';
+    fileInput.value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
