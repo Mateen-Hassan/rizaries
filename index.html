@@ -328,7 +328,8 @@
     background:var(--cream-deep);
     border-radius:8px;
     margin-top:8px;
-    display:flex;
+    /* display:flex; */
+    display: none;
     align-items:center;
     gap:10px;
     margin-bottom: 10px;
@@ -1189,7 +1190,7 @@
     const alsoContainer = document.getElementById('alsoBlocks');
     alsoContainer.innerHTML = '';
     const alsoGrids = [];
-    runners.slice(0,2).forEach(r => {
+    runners.slice(0,1).forEach(r => {
       const block = document.createElement('div');
       block.className = 'also-block';
       block.innerHTML = `
