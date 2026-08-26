@@ -88,12 +88,14 @@ Return:
 - floor_color: common color name
 - furniture: up to 5 visible furniture/decor categories
 - recommended_collection_handles: rank up to 4 exact handles that best fit the whole room, considering colors + style + furniture
+- harmony_recommendation: pick EXACTLY 2 color-harmony types from this fixed list, choosing whichever 2 genuinely suit this room's specific style, mood and furniture — not a generic default: Complementary, Analogous, Triadic, Monochromatic, Split Complementary, Tetradic, Square
+- harmony_reasoning: an object with those same 2 harmony type names as keys, each mapped to one short sentence (max 18 words) explaining why it fits THIS room specifically, referencing something you actually see
 
 Allowed collections:
 ${themeText}
 
 JSON shape:
-{"room_type":"","style":"","mood":"","dominant_color":"","secondary_color":"","floor_color":"","furniture":[],"recommended_collection_handles":[]}`;
+{"room_type":"","style":"","mood":"","dominant_color":"","secondary_color":"","floor_color":"","furniture":[],"recommended_collection_handles":[],"harmony_recommendation":[],"harmony_reasoning":{}}`;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -143,6 +145,18 @@ JSON shape:
       ? result.recommended_collection_handles.filter(h => allowedHandles.has(String(h))).slice(0, 4)
       : [];
     result.furniture = Array.isArray(result.furniture) ? result.furniture.slice(0, 5) : [];
+
+    const allowedHarmonies = new Set(['Complementary', 'Analogous', 'Triadic', 'Monochromatic', 'Split Complementary', 'Tetradic', 'Square']);
+    result.harmony_recommendation = Array.isArray(result.harmony_recommendation)
+      ? result.harmony_recommendation.filter(h => allowedHarmonies.has(String(h))).slice(0, 2)
+      : [];
+    const reasoningIn = result.harmony_reasoning && typeof result.harmony_reasoning === 'object' ? result.harmony_reasoning : {};
+    result.harmony_reasoning = {};
+    for (const type of result.harmony_recommendation) {
+      if (typeof reasoningIn[type] === 'string') {
+        result.harmony_reasoning[type] = reasoningIn[type].slice(0, 160);
+      }
+    }
 
     return jsonResponse(result, 200, request);
   } catch (error) {

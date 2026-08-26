@@ -188,7 +188,14 @@
     color:var(--gold-deep); font-weight:600; margin-bottom:8px;
   }
   .match-card{ background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:26px; }
-  .match-title{ font-family:'Fraunces',serif; font-size:26px; margin:0 0 14px; }
+  .match-title-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .match-title{ font-family:'Fraunces',serif; font-size:26px; margin:0; }
+  .ai-enhanced-badge{
+    font-size:10.5px; font-weight:600; letter-spacing:0.03em;
+    padding:4px 10px; border-radius:20px;
+    background:rgba(183,138,77,0.14); color:var(--gold-deep);
+    white-space:nowrap;
+  }
 
   .compare{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; margin-bottom:16px; }
   .compare-col{ text-align:center; }
@@ -237,55 +244,81 @@
     margin-bottom:16px;
   }
   .suggestion-grid{
-    /* display:grid; */
-    display: none;
-    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
-    gap:14px;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:16px;
     margin-bottom:12px;
   }
   .suggestion-card{
     background:var(--paper);
     border:1px solid var(--line);
-    border-radius:12px;
-    padding:16px;
+    border-radius:14px;
+    padding:18px 16px;
     transition:transform .15s ease, box-shadow .15s ease;
+    opacity:0;
+    animation:fadeUp .4s ease forwards;
   }
-  .suggestion-card:hover{ 
-    transform:translateY(-3px); 
-    box-shadow:0 4px 12px rgba(42,33,27,0.08);
+  .suggestion-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 6px 16px rgba(42,33,27,0.09);
   }
   .suggestion-card .label{
-    font-size:12px;
+    font-size:13px;
     font-weight:600;
-    margin-bottom:8px;
+    margin-bottom:12px;
     color:var(--ink);
     text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .ai-pick-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--gold-deep);
+    display:inline-block;
   }
   .suggestion-card .colors{
     display:flex;
-    gap:5px;
-    margin:0 auto;
+    gap:6px;
+    margin:0 auto 12px;
   }
-  .suggestion-card .colors span{
+  .swatch-col{
     flex:1;
-    height:32px;
-    border-radius:5px;
-    border:1px solid var(--line);
-    min-width:24px;
-    position:relative;
-    transition:transform .15s ease;
+    text-align:center;
   }
-  .suggestion-card .colors span:hover{
-    transform:scale(1.05);
+  .suggestion-card .swatch{
+    display:block;
+    width:100%;
+    height:40px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .suggestion-card .swatch:hover{
+    transform:scale(1.06) translateY(-1px);
+    box-shadow:0 3px 8px rgba(42,33,27,0.15);
     z-index:1;
   }
-  .suggestion-card .color-hex{
-    font-size:8px;
+  .suggestion-card .swatch.copied{
+    outline:2px solid var(--gold-deep);
+    outline-offset:1px;
+  }
+  .swatch-role{
+    font-size:9px;
     color:var(--ink-soft);
-    font-family:monospace;
+    margin-top:5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .suggestion-why{
+    font-size:12px;
+    line-height:1.5;
+    color:var(--ink-soft);
     text-align:center;
-    margin-top:4px;
-    opacity:0.6;
+    padding-top:10px;
+    border-top:1px solid var(--line);
   }
   .suggestion-note{
     font-size:12px;
@@ -445,7 +478,10 @@
 
     <div class="match-eyebrow">Best match</div>
     <div class="match-card">
-      <h2 class="match-title" id="matchTitle">—</h2>
+      <div class="match-title-row">
+        <h2 class="match-title" id="matchTitle">—</h2>
+        <span class="ai-enhanced-badge" id="aiEnhancedBadge" style="display:none;" title="Ranked using room style, furniture and mood — not just color">✨ AI-enhanced</span>
+      </div>
 
       <div class="compare">
         <div class="compare-col">
@@ -471,14 +507,13 @@
       <!-- Color Suggestions Section - Simplified -->
       <div class="suggestions-section" id="suggestionsSection">
         <div class="suggestions-title">
-          🎨 Color Pairing Suggestions
-          <small>— based on color theory</small>
+          🎨 Your Best Color Pairings
         </div>
-        <div class="suggestions-sub">Beautiful color harmonies that complement your room's dominant color</div>
+        <div class="suggestions-sub" id="suggestionsSub">Beautiful color harmonies that complement your room's dominant color</div>
         <div class="suggestion-grid" id="suggestionGrid"></div>
         <div class="suggestion-note">
           <span class="icon">💡</span>
-          <span><strong>Pro tip:</strong> Use these color schemes as inspiration for accent walls, furniture, decor, and accessories to create a cohesive, professionally-designed space.</span>
+          <span><strong>Pro tip:</strong> Use these color schemes as inspiration for accent walls, furniture, decor, and accessories to create a cohesive, professionally-designed space. Click any swatch to copy its hex code.</span>
         </div>
       </div>
 
@@ -748,52 +783,41 @@
     };
   }
 
-  function suggestHarmonyForColor(rgb) {
-    const analysis = analyzeColor(rgb);
-    const harmonies = [];
-    
-    // Core harmonies (always included)
-    harmonies.push({
-      type: "Complementary",
-      colors: generateComplementary(rgb)
-    });
-    
-    harmonies.push({
-      type: "Analogous",
-      colors: generateAnalogous(rgb)
-    });
-    
-    harmonies.push({
-      type: "Triadic",
-      colors: generateTriadic(rgb)
-    });
-    
-    harmonies.push({
-      type: "Monochromatic",
-      colors: generateMonochromatic(rgb)
-    });
-    
-    harmonies.push({
-      type: "Split Complementary",
-      colors: generateSplitComplementary(rgb)
-    });
-    
-    // Extra harmonies for specific color types
-    if (analysis.isVibrant) {
-      harmonies.push({
-        type: "Square",
-        colors: generateSquare(rgb)
-      });
+  // ---- Smart harmony picker (AI-first, color-theory fallback) ----
+  const HARMONY_GENERATORS = {
+    "Complementary": generateComplementary,
+    "Analogous": generateAnalogous,
+    "Triadic": generateTriadic,
+    "Monochromatic": generateMonochromatic,
+    "Split Complementary": generateSplitComplementary,
+    "Tetradic": generateTetradic,
+    "Square": generateSquare,
+  };
+
+  const HARMONY_DEFAULT_REASON = {
+    "Complementary": "Bold, opposite-hue pairing — great for a single accent wall or statement piece.",
+    "Analogous": "Neighboring hues that blend smoothly for a calm, cohesive room.",
+    "Triadic": "Three balanced hues for a playful, energetic space.",
+    "Monochromatic": "Shades of one color for an elegant, unified look.",
+    "Split Complementary": "Softer contrast than complementary — easier to live with day to day.",
+    "Tetradic": "Four-color palette for a rich, layered decor scheme.",
+    "Square": "Four evenly-spaced hues for a vibrant, curated mix.",
+  };
+
+  // Picks exactly 2 harmony types. Prefers the AI's room-aware picks (it has
+  // seen furniture, style and mood, not just a single RGB value); falls back
+  // to a color-analysis heuristic only when AI is unavailable.
+  function pickBestHarmonies(rgb, ai) {
+    if (ai && Array.isArray(ai.harmony_recommendation)) {
+      const valid = ai.harmony_recommendation.filter(h => HARMONY_GENERATORS[h]);
+      if (valid.length >= 2) return valid.slice(0, 2);
     }
-    
-    if (analysis.isWarm || analysis.isCool) {
-      harmonies.push({
-        type: "Tetradic",
-        colors: generateTetradic(rgb)
-      });
-    }
-    
-    return harmonies;
+    const a = analyzeColor(rgb);
+    if (a.isNeutral) return ["Monochromatic", "Analogous"];
+    if (a.isDark) return ["Split Complementary", "Monochromatic"];
+    if (a.isVibrant) return ["Complementary", "Triadic"];
+    if (a.isLight) return ["Analogous", "Complementary"];
+    return ["Complementary", "Analogous"];
   }
 
   // ---- Utility Functions ----
@@ -922,27 +946,58 @@
     });
   }
 
-  // Simplified renderSuggestions - only shows harmony type and color swatches
-  function renderSuggestions(rgb) {
+  // Shows exactly the 2 best-fit harmonies for this room (AI-picked when
+  // available, color-theory fallback otherwise) with a reason and
+  // click-to-copy swatches — richer cards since there are only 2 now.
+  const SWATCH_ROLES = ['Base', 'Accent', 'Highlight', 'Support', 'Trim'];
+
+  function renderSuggestions(rgb, ai) {
     const container = document.getElementById('suggestionGrid');
-    const harmonies = suggestHarmonyForColor(rgb);
-    
+    const sub = document.getElementById('suggestionsSub');
+    const picks = pickBestHarmonies(rgb, ai);
+    const aiReasons = (ai && ai.harmony_reasoning) || {};
+    const isAIPicked = ai && Array.isArray(ai.harmony_recommendation) && ai.harmony_recommendation.length >= 2;
+
+    if (sub) {
+      sub.textContent = isAIPicked
+        ? `Picked by AI for this ${(ai.room_type || 'room')}${ai.style ? `'s ${ai.style} style` : ''} — not just its colors.`
+        : "Two color harmonies that complement your room's dominant color.";
+    }
+
     container.innerHTML = '';
-    harmonies.forEach(harmony => {
+    picks.forEach((type, cardIdx) => {
+      const colors = HARMONY_GENERATORS[type](rgb);
+      const swatchesHtml = colors.map((c, i) => {
+        const hex = rgbToHex(c);
+        return `
+          <div class="swatch-col">
+            <span class="swatch" style="background:${hex}" data-hex="${hex}" title="Click to copy ${hex}"></span>
+            <div class="swatch-role">${SWATCH_ROLES[i] || ''}</div>
+          </div>`;
+      }).join('');
+
+      const reason = aiReasons[type] || HARMONY_DEFAULT_REASON[type] || '';
+
       const card = document.createElement('div');
       card.className = 'suggestion-card';
-      
-      const colorsHtml = harmony.colors.map(c => {
-        const hex = rgbToHex(c);
-        return `<span style="background:${hex}" title="${hex}"></span>`;
-      }).join('');
-      
+      card.style.animationDelay = (cardIdx * 90) + 'ms';
       card.innerHTML = `
-        <div class="label">${harmony.type}</div>
-        <div class="colors">${colorsHtml}</div>
+        <div class="label">${type}${isAIPicked ? ' <span class="ai-pick-dot" title="AI-picked for this room"></span>' : ''}</div>
+        <div class="colors">${swatchesHtml}</div>
+        ${reason ? `<div class="suggestion-why">${reason}</div>` : ''}
       `;
-      
       container.appendChild(card);
+    });
+
+    container.querySelectorAll('.swatch').forEach(sw => {
+      sw.addEventListener('click', () => {
+        const hex = sw.dataset.hex;
+        navigator.clipboard?.writeText(hex).catch(() => {});
+        const original = sw.title;
+        sw.classList.add('copied');
+        sw.title = `Copied ${hex}`;
+        setTimeout(() => { sw.classList.remove('copied'); sw.title = original; }, 900);
+      });
     });
   }
 
@@ -1104,6 +1159,8 @@
     const best = ranked[0];
     const runners = ranked.slice(1, 4);
     renderAIInsights(ai);
+    document.getElementById('aiEnhancedBadge').style.display =
+      (ai && Array.isArray(ai.recommended_collection_handles) && ai.recommended_collection_handles.length > 0) ? 'inline-block' : 'none';
 
     document.getElementById('matchTitle').textContent = best.theme.name;
     renderStrip(document.getElementById('compareTheme'), best.theme.colors.map(h => ({ rgb: hexToRgb(h), weight: 1 })));
@@ -1114,10 +1171,10 @@
 
     document.getElementById('shopLink').href = `${STORE}/collections/${best.theme.handle}`;
 
-    // Render color suggestions
+    // Render color suggestions — AI-aware when a room analysis is available
     if (palette && palette.length > 0) {
       const dominantColor = palette[0].rgb;
-      renderSuggestions(dominantColor);
+      renderSuggestions(dominantColor, ai);
       document.getElementById('suggestionsSection').style.display = 'block';
     } else {
       document.getElementById('suggestionsSection').style.display = 'none';
