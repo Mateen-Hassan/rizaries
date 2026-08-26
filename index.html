@@ -244,7 +244,8 @@
     margin-bottom:16px;
   }
   .suggestion-grid{
-    display:grid;
+    /* display:grid; */
+    display: none;
     grid-template-columns:repeat(2, 1fr);
     gap:16px;
     margin-bottom:12px;
@@ -1188,7 +1189,7 @@
     const alsoContainer = document.getElementById('alsoBlocks');
     alsoContainer.innerHTML = '';
     const alsoGrids = [];
-    runners.forEach(r => {
+    runners.slice(0,2).forEach(r => {
       const block = document.createElement('div');
       block.className = 'also-block';
       block.innerHTML = `
