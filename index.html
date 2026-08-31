@@ -531,7 +531,7 @@
   </div>
 
   <div class="note">
-    Prototype — color extraction runs locally in the browser. For better room understanding, the resized photo is sent to the protected Netlify Function and analyzed by Groq vision. The AI result only improves collection ranking; the local color engine remains the fallback if AI is unavailable. Products are pulled live from Rizaries collections.
+    Prototype — color extraction runs locally in the browser. For better room understanding, the resized photo is sent to the protected Netlify Function and analyzed by Gemini vision. The AI result only improves collection ranking; the local color engine remains the fallback if AI is unavailable. Products are pulled live from Rizaries collections.
   </div>
 
 </div>
@@ -1053,7 +1053,7 @@
     });
   }
 
-  // ---- AI room analysis (Groq via Netlify Function) ----
+  // ---- AI room analysis (gemini via Netlify Function) ----
   const AI_ANALYSIS_ENDPOINT = 'https://rizaries-sales-booster.netlify.app/.netlify/functions/analyze-room';
 
   function fileDataUrlToParts(dataUrl) {
@@ -1119,7 +1119,7 @@
     })).sort((a,b) => b.score - a.score);
   }
 
-  // Resize once on the client: smaller upload, faster Groq request, lower bandwidth.
+  // Resize once on the client: smaller upload, faster gemini request, lower bandwidth.
   // The same optimized image is used for local palette extraction and AI.
   function prepareImage(file, maxSide = 1280, quality = 0.82) {
     return new Promise((resolve, reject) => {
@@ -1295,7 +1295,7 @@
 
       // Start AI and UI processing together instead of waiting for one after the other.
       const aiPromise = analyzeRoomWithAI(optimizedDataUrl).catch(err => {
-        console.warn('Groq analysis unavailable:', err.message);
+        console.warn('Gemini analysis unavailable:', err.message);
         return null;
       });
       await runProcessingAnimation(optimizedDataUrl, palette);

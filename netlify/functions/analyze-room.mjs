@@ -111,7 +111,7 @@ JSON shape:
             contents: [{
               parts: [
                 { text: prompt },
-                { inline_data: { mime_type: mimeType, data: image } }
+                { inlineData: { mimeType: mimeType, data: image } }
               ]
             }],
             generationConfig: {
@@ -130,7 +130,7 @@ JSON shape:
 
     const raw = await response.json().catch(() => ({}));
     if (!response.ok) {
-      console.error('Gemini error:', raw?.error?.message || response.status);
+      console.error('Gemini error:', response.status, JSON.stringify(raw?.error || raw));
       const status = response.status === 429 ? 429 : 502;
       return jsonResponse({ error: status === 429 ? 'AI is temporarily busy. Please try again in a moment.' : 'AI provider error' }, status, request);
     }
