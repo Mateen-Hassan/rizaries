@@ -244,8 +244,7 @@
     margin-bottom:16px;
   }
   .suggestion-grid{
-    /* display:grid; */
-    display: none;
+    display:grid;
     grid-template-columns:repeat(2, 1fr);
     gap:16px;
     margin-bottom:12px;
@@ -328,8 +327,7 @@
     background:var(--cream-deep);
     border-radius:8px;
     margin-top:8px;
-    /* display:flex; */
-    display: none;
+    display:flex;
     align-items:center;
     gap:10px;
     margin-bottom: 10px;
@@ -1056,7 +1054,7 @@
   }
 
   // ---- AI room analysis (Groq via Netlify Function) ----
-  const AI_ANALYSIS_ENDPOINT = '/api/analyze-room';
+  const AI_ANALYSIS_ENDPOINT = 'https://rizaries-sales-booster.netlify.app/.netlify/functions/analyze-room';
 
   function fileDataUrlToParts(dataUrl) {
     const match = /^data:(image\/[^;]+);base64,(.+)$/s.exec(dataUrl || '');
@@ -1190,7 +1188,7 @@
     const alsoContainer = document.getElementById('alsoBlocks');
     alsoContainer.innerHTML = '';
     const alsoGrids = [];
-    runners.slice(0,1).forEach(r => {
+    runners.forEach(r => {
       const block = document.createElement('div');
       block.className = 'also-block';
       block.innerHTML = `
