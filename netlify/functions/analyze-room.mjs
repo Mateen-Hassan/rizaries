@@ -117,8 +117,9 @@ JSON shape:
             generationConfig: {
               temperature: 0.3,
               topP: 0.8,
-              maxOutputTokens: 500,
-              responseMimeType: 'application/json'
+              maxOutputTokens: 800,
+              responseMimeType: 'application/json',
+              thinkingConfig: { thinkingBudget: 0 }
             }
           }),
           signal: controller.signal
@@ -135,8 +136,15 @@ JSON shape:
       return jsonResponse({ error: status === 429 ? 'AI is temporarily busy. Please try again in a moment.' : 'AI provider error' }, status, request);
     }
 
-    const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const result = extractJson(text);
+    const candidate = raw?.candidates?.[0];
+    const text = candidate?.content?.parts?.[0]?.text || '';
+    let result;
+    try {
+      result = extractJson(text);
+    } catch (parseErr) {
+      console.error('JSON parse failed. finishReason:', candidate?.finishReason, '| text snippet:', text.slice(0, 300));
+      throw parseErr;
+    }
     const allowedHandles = new Set(THEMES.map(t => t.handle));
 
     result.recommended_collection_handles = Array.isArray(result.recommended_collection_handles)
