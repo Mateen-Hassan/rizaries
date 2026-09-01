@@ -1,7 +1,7 @@
 // Netlify Function + Gemini Vision.
 // Keep GEMINI_API_KEY server-side. Never put it in Shopify HTML/browser JS.
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const MAX_BASE64_LENGTH = 3_600_000; // Keep request size reasonable.
 
 const THEMES = [
