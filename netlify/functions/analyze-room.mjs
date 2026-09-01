@@ -98,7 +98,7 @@ JSON shape:
 {"room_type":"","style":"","mood":"","dominant_color":"","secondary_color":"","floor_color":"","furniture":[],"recommended_collection_handles":[],"harmony_recommendation":[],"harmony_reasoning":{}}`;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const timeout = setTimeout(() => controller.abort(), 6500); // leaves headroom for cold-start within Netlify free plan's 10s hard ceiling
 
     let response;
     try {
